@@ -71,6 +71,7 @@ export default function CadastroEmpresaView() {
 
           <CampoTexto
             label="Nome da empresa"
+            icone={{ ios: "person", android: "person", web: "person" }}
             placeholder="Ex.: Condomínio dos Sonhos"
             autoCapitalize="words"
             value={form.nome}
@@ -78,6 +79,7 @@ export default function CadastroEmpresaView() {
           />
           <CampoTexto
             label="CNPJ"
+            icone={{ ios: "building.2", android: "apartment", web: "apartment" }}
             placeholder="Somente números"
             keyboardType="numeric"
             maxLength={14}
@@ -86,6 +88,7 @@ export default function CadastroEmpresaView() {
           />
           <CampoTexto
             label="E-mail"
+            icone={{ ios: "envelope", android: "mail", web: "mail" }}
             placeholder="empresa@email.com"
             keyboardType="email-address"
             autoCapitalize="none"
@@ -94,6 +97,7 @@ export default function CadastroEmpresaView() {
           />
           <CampoTexto
             label="Senha"
+            icone={{ ios: "lock", android: "lock", web: "lock" }}
             placeholder="Mínimo de 6 caracteres"
             senha
             value={form.senha}
@@ -101,6 +105,7 @@ export default function CadastroEmpresaView() {
           />
           <CampoTexto
             label="Confirmar senha"
+            icone={{ ios: "lock", android: "lock", web: "lock" }}
             placeholder="Repita a senha"
             senha
             value={form.confirmarSenha}
