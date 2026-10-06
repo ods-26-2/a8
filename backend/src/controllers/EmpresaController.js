@@ -1,5 +1,4 @@
 const bcrypt = require("bcryptjs");
-const {gerarToken} = require("../config/token");
 const EmpresaModel = require("../models/EmpresaModel");
 
 const TIPOS_VALIDOS = ["condominio", "empresa"];
@@ -48,14 +47,8 @@ const EmpresaController = {
         userCadastra: Boolean(userCadastra),
       });
 
-      const token = gerarToken({ id: cnpjLimpo, papel: "empresa" });
+      return res.status(201).json({ mensagem: "Empresa cadastrada com sucesso." });
 
-      return res.status(201).json({
-        mensagem: "Empresa cadastrada com sucesso.",
-        token,
-        empresa: { cnpj: cnpjLimpo, nome, tipo },
-      });
-      
     } catch (error) {
       console.error(error);
       return res.status(500).json({ erro: "Erro interno no servidor." });

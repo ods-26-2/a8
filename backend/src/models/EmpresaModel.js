@@ -19,21 +19,6 @@ const EmpresaModel = {
     return rows[0] || null;
   },
 
-  async findPerfil(cnpj) {
-    const [rows] = await pool.execute(
-      "SELECT CNPJ, Nome, email, Tipo, User_cadastra FROM Empresa WHERE CNPJ = ?",
-      [cnpj]
-    );
-    return rows[0] || null;
-  },
-
-  async findParaLogin(email) {
-    const [rows] = await pool.execute(
-      "SELECT CNPJ, Nome, Tipo, senha FROM Empresa WHERE email = ?",
-      [email]
-    );
-    return rows[0] || null;
-  },
 
 };
 

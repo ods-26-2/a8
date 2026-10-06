@@ -1,5 +1,12 @@
+import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+} from "@expo-google-fonts/poppins";
+import { useFonts } from "expo-font";
 import { SymbolView } from "expo-symbols";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Footer } from "@/components/Footer";
@@ -8,10 +15,21 @@ import { Cores } from "@/constants/parkflow";
 import { useHomeEmpresaController } from "@/controllers/useHomeEmpresaController";
 
 export default function HomeEmpresaView() {
-  const { nome, atalhos, abas, abaAtiva, setAbaAtiva, abrirAtalho, sair } =
-    useHomeEmpresaController();
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+
+  const { atalhos, abas, abaAtiva, setAbaAtiva, abrirAtalho } = useHomeEmpresaController();
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
+    <View style={s.webBackground}>
     <SafeAreaView style={s.safe} edges={["top", "left", "right"]}>
       <ScrollView
         style={s.flex}
@@ -29,18 +47,10 @@ export default function HomeEmpresaView() {
               size={44}
               style={s.avatar}
             />
-            <View style={s.boasVindas}>
-              <Text style={s.bemVindo}>Bem-vindo,</Text>
-              <Text style={s.nome} numberOfLines={2}>
-                {nome}
-              </Text>
-            </View>
+            <Text style={s.bemVindo}>Bem-vindo</Text>
           </View>
 
-          {/* Toque longo no logo = sair da conta (provisório, até existir a aba Perfil) */}
-          <Pressable onLongPress={sair} delayLongPress={600}>
-            <Image source={require("@/assets/images/logo.png")} style={s.logo} />
-          </Pressable>
+          <Image source={require("@/assets/images/logo.png")} style={s.logo} />
         </View>
 
         <View style={s.grade}>
@@ -57,11 +67,18 @@ export default function HomeEmpresaView() {
 
       <Footer abas={abas} ativa={abaAtiva} onChange={setAbaAtiva} />
     </SafeAreaView>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Cores.fundo },
+    webBackground: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Cores.fundo,
+  },
+  safe: { flex: 1, width: "100%", maxWidth: 430, backgroundColor: Cores.fundo },
   flex: { flex: 1 },
   content: {
     padding: 24,
@@ -73,9 +90,7 @@ const s = StyleSheet.create({
   topo: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   perfil: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12, marginRight: 8 },
   avatar: { width: 44, height: 44 },
-  boasVindas: { flex: 1 },
-  bemVindo: { color: Cores.textoSecundario, fontSize: 12, fontFamily: "Poppins_400Regular" },
-  nome: { color: Cores.texto, fontSize: 18, fontFamily: "Poppins_700Bold" },
+  bemVindo: { color: Cores.texto, fontSize: 20, fontFamily: "Poppins_700Bold" },
   logo: { width: 100, height: 100 },
   grade: {
     flexDirection: "row",

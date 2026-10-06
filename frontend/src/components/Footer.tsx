@@ -37,12 +37,17 @@ export function Footer({ abas, ativa, onChange }: Props) {
 }
 
 const s = StyleSheet.create({
-  barra: {
+   barra: {
+    width: "100%",
     flexDirection: "row",
     backgroundColor: Cores.barra,
-    paddingTop: 12,
+    paddingTop: 10,
+    paddingHorizontal: 8,
+
+    borderTopWidth: 1,
+    borderTopColor: "#E5E5E5",
   },
-  item: { flex: 1, alignItems: "center", gap: 4 },
+  item: { flex: 1, alignItems: "center", justifyContent: "center", gap: 4, paddingVertical: 6, },
   icone: { width: 24, height: 24 },
   texto: { fontSize: 11, fontFamily: "Poppins_500Medium" },
 });
