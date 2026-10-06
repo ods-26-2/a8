@@ -1,8 +1,10 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-
+import {useSessao} from "@/contexts/SessaoContext";
 import { CadastroEmpresa } from "@/models/Empresa";
 import { empresaService } from "@/services/empresaService";
+
+const {entrar} = useSessao();
 
 const FORM_INICIAL: CadastroEmpresa = {
   nome: "",
@@ -42,10 +44,9 @@ export function useCadastroEmpresaController() {
     try {
       setLoading(true);
       setFeedback(null);
-      const { mensagem } = await empresaService.cadastrar(form);
-      setFeedback({ tipo: "sucesso", texto: mensagem });
-      setForm(FORM_INICIAL);
-      // Passo do Login: aqui faremos router.replace("/login")
+      const { token, empresa } = await empresaService.cadastrar(form);
+      await entrar(token, empresa);
+      router.replace("/home-empresa");
     } catch (error) {
       setFeedback({
         tipo: "erro",

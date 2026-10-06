@@ -1,7 +1,10 @@
-import { CadastroEmpresa } from "@/models/Empresa";
+import { CadastroEmpresa, Empresa, RespostaAutenticacao } from "@/models/Empresa";
 import { apiRequest } from "./api";
 
 export const empresaService = {
   cadastrar: (dados: CadastroEmpresa) =>
-    apiRequest<{ mensagem: string }>("/api/empresas", "POST", dados),
+    apiRequest<RespostaAutenticacao>("/api/empresas", "POST", dados),
+
+  perfil: (token: string) =>
+    apiRequest<{ empresa: Empresa }>("/api/empresas/me", "GET", undefined, token),
 };
