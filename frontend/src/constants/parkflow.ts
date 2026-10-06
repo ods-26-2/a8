@@ -9,4 +9,7 @@ export const Cores = {
   botaoTexto: "#161622",
   erro: "#FF6B6B",
   sucesso: "#5DD39E",
+  cartao: "#8C8888",
+  cartaoPressionado: "#767272",
+  barra: "#27273A",
 } as const;

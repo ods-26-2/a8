@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const {gerarToken} = require("../config/token");
 const EmpresaModel = require("../models/EmpresaModel");
 
 const TIPOS_VALIDOS = ["condominio", "empresa"];
@@ -47,12 +48,46 @@ const EmpresaController = {
         userCadastra: Boolean(userCadastra),
       });
 
-      return res.status(201).json({ mensagem: "Empresa cadastrada com sucesso." });
+      const token = gerarToken({ id: cnpjLimpo, papel: "empresa" });
+
+      return res.status(201).json({
+        mensagem: "Empresa cadastrada com sucesso.",
+        token,
+        empresa: { cnpj: cnpjLimpo, nome, tipo },
+      });
+      
     } catch (error) {
       console.error(error);
       return res.status(500).json({ erro: "Erro interno no servidor." });
     }
   },
+
+  async perfil(req, res) {
+    try {
+      if (req.auth.papel !== "empresa") {
+        return res.status(403).json({ erro: "Acesso negado." });
+      }
+
+      const empresa = await EmpresaModel.findPerfil(req.auth.id);
+      if (!empresa) {
+        return res.status(404).json({ erro: "Empresa não encontrada." });
+      }
+
+      return res.json({
+        empresa: {
+          cnpj: empresa.CNPJ,
+          nome: empresa.Nome,
+          email: empresa.email,
+          tipo: empresa.Tipo,
+          userCadastra: Boolean(empresa.User_cadastra),
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ erro: "Erro interno no servidor." });
+    }
+  },
+
 };
 
 module.exports = EmpresaController;
