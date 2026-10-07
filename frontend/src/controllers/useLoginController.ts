@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { fazerLogin } from "../services/loginService";
+import { router } from "expo-router";
 
 export function useLoginController() {
   const [email, setEmail] = useState("");
@@ -27,9 +28,7 @@ export function useLoginController() {
       console.log("Login realizado com sucesso:");
       console.log(resultado);
 
-      // Por enquanto vamos apenas mostrar no console.
-      // Depois decidimos para qual tela o usuário será enviado.
-
+      router.replace("/home-empresa");
     } catch (error: any) {
       console.error("Erro no login:", error);
 
