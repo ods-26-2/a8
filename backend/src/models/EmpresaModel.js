@@ -18,6 +18,8 @@ const EmpresaModel = {
     const [rows] = await pool.execute("SELECT CNPJ FROM Empresa WHERE email = ?", [email]);
     return rows[0] || null;
   },
+
+
 };
 
 module.exports = EmpresaModel;
