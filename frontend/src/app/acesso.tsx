@@ -1,1 +1,1 @@
-export { default } from "@/view/AcessoView";
+export { default } from "../view/AcessoView";
