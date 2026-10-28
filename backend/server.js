@@ -6,6 +6,7 @@ const pool = require("./src/config/database");
 
 const empresaRoutes = require("./src/routes/empresaRoutes");
 const loginRoutes = require("./src/routes/loginRoutes");
+const veiculoConvidadoRoutes = require("./src/routes/veiculoConvidadoRoutes");
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/empresas", empresaRoutes);
 app.use("/api", loginRoutes);
+app.use("/api/veiculos-convidados", veiculoConvidadoRoutes);
 
 app.get("/api/health", async (req, res) => {
   try {

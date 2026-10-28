@@ -9,9 +9,10 @@ type Props = {
   abas: Aba[];
   ativa: IdAba;
   onChange: (id: IdAba) => void;
+  onSair?: () => void;
 };
 
-export function Footer({ abas, ativa, onChange }: Props) {
+export function Footer({ abas, ativa, onChange, onSair }: Props) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -32,6 +33,21 @@ export function Footer({ abas, ativa, onChange }: Props) {
           </Pressable>
         );
       })}
+      {onSair && (
+        <Pressable style={s.item} onPress={onSair} accessibilityRole="button">
+          <SymbolView
+            name={{
+              ios: "rectangle.portrait.and.arrow.right",
+              android: "logout",
+              web: "logout",
+            }}
+            tintColor={Cores.textoSecundario}
+            size={24}
+            style={s.icone}
+          />
+          <Text style={[s.texto, { color: Cores.textoSecundario }]}>Sair</Text>
+        </Pressable>
+      )}
     </View>
   );
 }

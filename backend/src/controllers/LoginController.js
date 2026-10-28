@@ -1,7 +1,14 @@
 const pool = require("../config/database");
 const bcrypt = require("bcrypt");
 
-// Login
+const jwt = require("jsonwebtoken");
+
+function gerarToken(payload) {
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  });
+}
+
 async function fazerLogin(req, res) {
   try {
     const { email, senha } = req.body;
@@ -49,14 +56,15 @@ async function fazerLogin(req, res) {
         });
       }
 
+      const token = gerarToken({id: empresa.CNPJ, papel: "empresa", tipo});
       return res.status(200).json({
         mensagem: "Login realizado com sucesso",
-
+        token,
         usuario: {
           email: empresa.email,
           nome: empresa.Nome,
           cnpj: empresa.CNPJ,
-          tipo: tipo,
+          tipo,
         },
       });
     }
@@ -103,10 +111,11 @@ async function fazerLogin(req, res) {
         [email]
       );
 
+      const token = gerarToken({id: usuario.CPF, papel: "usuario", tipo: "empresa_adm"});
       if (empresaAdm.length > 0) {
         return res.status(200).json({
           mensagem: "Login realizado com sucesso",
-
+          token,
           usuario: {
             email: usuario.email,
             nome: usuario.Nome,
@@ -138,10 +147,11 @@ async function fazerLogin(req, res) {
         [email]
       );
 
+      const tokenUser = gerarToken({id: usuario.CPF, papel: "usuario", tipo: "empresa_usuario"});
       if (empresaUsuario.length > 0) {
         return res.status(200).json({
           mensagem: "Login realizado com sucesso",
-
+          token: tokenUser,
           usuario: {
             email: usuario.email,
             nome: usuario.Nome,
@@ -160,10 +170,10 @@ async function fazerLogin(req, res) {
       // =====================================================
       // 5. USUÁRIO COMUM
       // =====================================================
-
+      const tokenComum = gerarToken({id: usuario.CPF, papel: "usuario", tipo: "usuario"});
       return res.status(200).json({
         mensagem: "Login realizado com sucesso",
-
+        token: tokenComum,
         usuario: {
           email: usuario.email,
           nome: usuario.Nome,

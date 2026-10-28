@@ -1,3 +1,4 @@
+Create database if not exists a8;
 USE a8;
 
 create table Empresa(

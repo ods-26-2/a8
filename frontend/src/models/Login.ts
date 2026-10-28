@@ -3,19 +3,23 @@ export interface LoginRequest {
   senha: string;
 }
 
+export type TipoConta =
+  | "empresa"
+  | "condominio"
+  | "empresa_adm"
+  | "empresa_usuario"
+  | "usuario";
+
+export interface UsuarioLogado {
+  email: string;
+  nome: string;
+  tipo: TipoConta;
+  cnpj?: string;
+  cpf?: string;
+}
+
 export interface LoginResponse {
   mensagem: string;
-  tipo: "usuario" | "empresa";
-  usuario?: {
-    email: string;
-    nome: string;
-    cpf?: string;
-  };
-  empresa?: {
-    cnpj: string;
-    nome: string;
-    email: string;
-    tipo: string;
-    userCadastra: boolean;
-  };
+  token: string;
+  usuario: UsuarioLogado;
 }
