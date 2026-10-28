@@ -1,16 +1,35 @@
-import { useState } from "react";
-import {useSessao} from "@/contexts/SessaoContext";
-import { ABAS, ATALHOS, IdAba, IdAtalho } from "@/models/HomeEmpresa";
-import {useRouter} from "expo-router";
 
-const router = useRouter();
+import { useState } from "react";
+import { useRouter } from "expo-router";
+import { useSessao } from "@/contexts/SessaoContext";
+import {
+  ABAS,
+  ATALHOS,
+  IdAba,
+  IdAtalho,
+} from "@/models/HomeEmpresa";
 
 export function useHomeEmpresaController() {
-  const {usuario, sair} = useSessao();
+  const router = useRouter();
+  const { usuario, sair } = useSessao();
+
   const [abaAtiva, setAbaAtiva] = useState<IdAba>("home");
 
   function abrirAtalho(id: IdAtalho) {
-    if (id === "convidado") router.push("/cadastro-veiculo-convidado");
+    console.log("Atalho clicado:", id);
+
+    switch (id) {
+      case "convidado":
+        router.push("/cadastro-veiculo-convidado");
+        break;
+
+      case "usuario":
+        router.push("/cadastro-usuario");
+        break;
+
+      default:
+        console.warn("Atalho sem rota configurada:", id);
+    }
   }
 
   return {
