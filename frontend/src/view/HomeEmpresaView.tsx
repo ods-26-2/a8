@@ -6,7 +6,7 @@ import {
 } from "@expo-google-fonts/poppins";
 import { useFonts } from "expo-font";
 import { SymbolView } from "expo-symbols";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image,Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Footer } from "@/components/Footer";
@@ -22,7 +22,7 @@ export default function HomeEmpresaView() {
     Poppins_700Bold,
   });
 
-  const { atalhos, abas, abaAtiva, setAbaAtiva, abrirAtalho } = useHomeEmpresaController();
+  const { nomeEmpresa, atalhos, abas, abaAtiva, setAbaAtiva, abrirAtalho, sair } = useHomeEmpresaController();
 
   if (!fontsLoaded) {
     return null;
@@ -47,7 +47,7 @@ export default function HomeEmpresaView() {
               size={44}
               style={s.avatar}
             />
-            <Text style={s.bemVindo}>Bem-vindo</Text>
+            <Text style={s.bemVindo} numberOfLines={2}>{nomeEmpresa}</Text>
           </View>
 
           <Image source={require("@/assets/images/logo.png")} style={s.logo} />
@@ -65,7 +65,7 @@ export default function HomeEmpresaView() {
         </View>
       </ScrollView>
 
-      <Footer abas={abas} ativa={abaAtiva} onChange={setAbaAtiva} />
+      <Footer abas={abas} ativa={abaAtiva} onChange={setAbaAtiva} onSair={sair} />
     </SafeAreaView>
     </View>
   );
@@ -99,4 +99,6 @@ const s = StyleSheet.create({
     rowGap: 16,
     marginTop: 24,
   },
+  sair: { alignSelf: "center", marginTop: 32, padding: 12 },
+  sairTxt: { color: Cores.textoSecundario, fontFamily: "Poppins_500Medium", fontSize: 14 },
 });
