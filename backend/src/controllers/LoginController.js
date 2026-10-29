@@ -1,6 +1,5 @@
 const pool = require("../config/database");
 const bcrypt = require("bcrypt");
-
 const jwt = require("jsonwebtoken");
 
 function gerarToken(payload) {
@@ -56,17 +55,27 @@ async function fazerLogin(req, res) {
         });
       }
 
-      const token = gerarToken({id: empresa.CNPJ, papel: "empresa", tipo});
-      return res.status(200).json({
-        mensagem: "Login realizado com sucesso",
-        token,
-        usuario: {
-          email: empresa.email,
-          nome: empresa.Nome,
-          cnpj: empresa.CNPJ,
-          tipo,
-        },
-      });
+      
+    const token = gerarToken({
+      id: empresa.CNPJ,
+      cnpj: empresa.CNPJ,
+      papel: "empresa",
+      tipo,
+      podeCadastrarUsuarios:
+        Boolean(empresa.User_cadastra),
+    });
+
+    return res.status(200).json({
+      mensagem: "Login realizado com sucesso",
+      token,
+      usuario: {
+        email: empresa.email,
+        nome: empresa.Nome,
+        cnpj: empresa.CNPJ,
+        tipo,
+      },
+    });
+
     }
 
     // =====================================================
