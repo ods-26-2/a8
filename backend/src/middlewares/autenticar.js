@@ -37,11 +37,11 @@ function apenasEmpresa(req, res, next) {
     });
   }
 
-  if (!req.auth.podeCadastrarUsuarios) {
-    return res.status(403).json({
-      erro: "Esta empresa ou condomínio não tem permissão para cadastrar usuários.",
-    });
-  }
+//   if (!req.auth.podeCadastrarUsuarios) {
+//     return res.status(403).json({
+//       erro: "Esta empresa ou condomínio não tem permissão para cadastrar usuários.",
+//     });
+//   }
 
   req.empresa = {
     cnpj: req.auth.cnpj,
