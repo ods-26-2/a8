@@ -5,8 +5,10 @@ const FORMATO_DATA = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 const VeiculoConvidadoController = {
   async cadastrar(req, res) {
     try {
-      const { placa, emailUsuario, dataEntrada, dataSaida } = req.body;
-
+      const { cnpj, email: emailDoToken, funcao } = req.contexto;
+      const { placa, dataEntrada, dataSaida } = req.body;
+      const emailUsuario = funcao === "empresa" ? req.body.emailUsuario : emailDoToken;
+    
       if (!placa || !emailUsuario || !dataEntrada) {
         return res.status(400).json({ erro: "Preencha placa, e-mail do usuário e data de entrada." });
       }
@@ -32,7 +34,7 @@ const VeiculoConvidadoController = {
 
       await VeiculoConvidadoModel.create({
         placa: placaLimpa,
-        cnpj: req.auth.id, // CNPJ vem do token, nunca do formulário
+        cnpj, // CNPJ vem do token, nunca do formulário
         email: emailUsuario,
         dataEntrada,
         dataSaida: dataSaida || null,

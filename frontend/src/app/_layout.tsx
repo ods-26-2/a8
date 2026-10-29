@@ -5,21 +5,28 @@ import { Cores } from "@/constants/parkflow";
 import { SessaoProvider, useSessao } from "@/contexts/SessaoContext";
 
 function Rotas() {
-  const { usuario, carregando } = useSessao();
+  const { usuario, empresaAtual, carregando } = useSessao();
 
-  if (carregando) return null; // espera ler a sessão salva
+  if (carregando) return null;
 
   const logado = !!usuario;
+  const naEmpresa = !!empresaAtual;
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Cores.fundo } }}>
-      {/* Só com sessão */}
-      <Stack.Protected guard={logado}>
-        <Stack.Screen name="home-empresa" />
-        <Stack.Screen name="cadastro-veiculo-convidado" />
+      {/* Usuário logado que ainda não escolheu empresa */}
+      <Stack.Protected guard={logado && !naEmpresa}>
+        <Stack.Screen name="home-usuario" />
       </Stack.Protected>
 
-      {/* Só sem sessão: acesso, login e cadastro de empresa */}
+      {/* Dentro de uma empresa (login da empresa, ou usuário que escolheu uma) */}
+      <Stack.Protected guard={naEmpresa}>
+        <Stack.Screen name="home-empresa" />
+        <Stack.Screen name="cadastro-veiculo-convidado" />
+        <Stack.Screen name="cadastro-usuario" />
+      </Stack.Protected>
+
+      {/* Sem sessão */}
       <Stack.Protected guard={!logado}>
         <Stack.Screen name="index" />
         <Stack.Screen name="acesso" />

@@ -30,7 +30,7 @@ export async function apiRequest<T>(
       await armazenamento.limparSessao();
       aoSessaoExpirar?.();
     }
-    throw new Error(data.erro ?? `Erro ao conectar com a API (${response.status})`);
+    throw new Error(data.erro ?? data.mensagem ?? `Erro ao conectar com a API (${response.status})`);
   }
   return data as T;
 }

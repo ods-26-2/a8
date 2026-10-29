@@ -1,7 +1,12 @@
 const router = require("express").Router();
-const { autenticar, apenasEmpresa } = require("../middlewares/autenticar");
+const { autenticar, exigirContexto } = require("../middlewares/autenticar");
 const VeiculoConvidadoController = require("../controllers/VeiculoConvidadoController");
 
-router.post("/", autenticar, apenasEmpresa, VeiculoConvidadoController.cadastrar);
+router.post(
+  "/",
+  autenticar,
+  exigirContexto("empresa", "adm", "comum"),
+  VeiculoConvidadoController.cadastrar
+);
 
 module.exports = router;

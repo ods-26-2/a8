@@ -32,7 +32,7 @@ export default function CadastroVeiculoConvidadoView() {
     Poppins_700Bold,
   });
 
-  const { form, setCampo, enviar, loading, feedback, voltar } =
+  const { form, setCampo, enviar, loading, feedback, emailTravado, voltar } =
     useCadastroVeiculoConvidadoController();
 
   if (!fontsLoaded) {
@@ -78,6 +78,8 @@ export default function CadastroVeiculoConvidadoView() {
             autoCapitalize="none"
             value={form.emailUsuario}
             onChangeText={(v) => setCampo("emailUsuario", v)}
+            editable={!emailTravado}
+            style={emailTravado ? { opacity: 0.6 } : undefined}
           />
           <CampoTexto
             label="Entrada"

@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import {useSessao} from "@/contexts/SessaoContext";
 
 import { CadastroVeiculoConvidado } from "@/models/VeiculoConvidado";
 import { veiculoConvidadoService } from "@/services/veiculoConvidadoService";
@@ -16,7 +17,13 @@ type Feedback = { tipo: "erro" | "sucesso"; texto: string } | null;
 
 export function useCadastroVeiculoConvidadoController() {
   const router = useRouter();
-  const [form, setForm] = useState<CadastroVeiculoConvidado>(FORM_INICIAL);
+  const {usuario, empresaAtual} = useSessao();
+  const emailTravado = empresaAtual?.funcao !== "empresa";
+
+  const [form, setForm] = useState<CadastroVeiculoConvidado>(() => ({
+    ...FORM_INICIAL,
+    emailUsuario: emailTravado ? usuario?.email ?? "" : "",
+    }));
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>(null);
 
@@ -76,6 +83,7 @@ export function useCadastroVeiculoConvidadoController() {
     enviar,
     loading,
     feedback,
+    emailTravado,
     voltar: () => router.back(),
   };
 }

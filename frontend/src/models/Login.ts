@@ -1,14 +1,11 @@
+import { EmpresaAtual } from "./EmpresaVinculada";
+
 export interface LoginRequest {
   email: string;
   senha: string;
 }
 
-export type TipoConta =
-  | "empresa"
-  | "condominio"
-  | "empresa_adm"
-  | "empresa_usuario"
-  | "usuario";
+export type TipoConta = "empresa" | "condominio" | "usuario";
 
 export interface UsuarioLogado {
   email: string;
@@ -16,6 +13,7 @@ export interface UsuarioLogado {
   tipo: TipoConta;
   cnpj?: string;
   cpf?: string;
+  empresaAtual?: EmpresaAtual; 
 }
 
 export interface LoginResponse {

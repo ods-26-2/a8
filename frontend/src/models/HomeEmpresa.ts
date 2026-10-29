@@ -1,5 +1,6 @@
 import { SymbolView } from "expo-symbols";
 import { ComponentProps } from "react";
+import { FuncaoEmpresa } from "./EmpresaVinculada";
 
 export type Icone = ComponentProps<typeof SymbolView>["name"];
 
@@ -35,6 +36,12 @@ export const ATALHOS: Atalho[] = [
     icone: { ios: "person.badge.plus", android: "person_add", web: "person_add" },
   },
 ];
+
+export const ATALHOS_POR_FUNCAO: Record<FuncaoEmpresa, IdAtalho[]> = {
+  empresa: ["administrador", "usuario", "convidado"],
+  adm: ["usuario", "convidado"],
+  comum: ["convidado"],
+};
 
 export const ABAS: Aba[] = [
   { id: "home", titulo: "Home", icone: { ios: "house", android: "home", web: "home" } },
