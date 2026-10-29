@@ -22,7 +22,7 @@ export default function HomeEmpresaView() {
     Poppins_700Bold,
   });
 
-  const { nomeEmpresa, atalhos, abas, abaAtiva, setAbaAtiva, abrirAtalho, sair } = useHomeEmpresaController();
+  const { nomeEmpresa, podeTrocarEmpresa, trocarEmpresa, atalhos, abas, abaAtiva, setAbaAtiva, abrirAtalho, sair } = useHomeEmpresaController();
 
   if (!fontsLoaded) {
     return null;
@@ -47,7 +47,14 @@ export default function HomeEmpresaView() {
               size={44}
               style={s.avatar}
             />
-            <Text style={s.bemVindo} numberOfLines={2}>{nomeEmpresa}</Text>
+            <View style={s.flex}>
+              <Text style={s.bemVindo} numberOfLines={2}>{nomeEmpresa}</Text>
+              {podeTrocarEmpresa && (
+                <Pressable onPress={trocarEmpresa} hitSlop={8}>
+                  <Text style={s.trocar}>Trocar empresa</Text>
+                </Pressable>
+              )}
+            </View>
           </View>
 
           <Image source={require("@/assets/images/logo.png")} style={s.logo} />
@@ -101,4 +108,5 @@ const s = StyleSheet.create({
   },
   sair: { alignSelf: "center", marginTop: 32, padding: 12 },
   sairTxt: { color: Cores.textoSecundario, fontFamily: "Poppins_500Medium", fontSize: 14 },
+  trocar: { color: Cores.textoSecundario, fontSize: 13, fontFamily: "Poppins_500Medium" },
 });

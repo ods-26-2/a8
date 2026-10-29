@@ -1,10 +1,11 @@
+const bcrypt = require("bcrypt");
+const pool = require("../config/database");
+const UsuarioModel = require("../models/UsuarioModel");
+const { gerarToken } = require("../utils/token");
 
-import bcrypt from "bcrypt";
-import pool from "../config/database.js";
-
-export async function cadastrarUsuario(req, res) {
+ async function cadastrarUsuario(req, res) {
   const { nome, email, cpf, senha } = req.body;
-  const cnpj = req.empresa.cnpj;
+  const cnpj = req.contexto.cnpj;
 
   // Validações básicas
   if (
@@ -152,3 +153,49 @@ export async function cadastrarUsuario(req, res) {
     }
   }
 }
+
+async function listarEmpresas(req, res){
+  try {
+    const empresas = await UsuarioModel.listarEmpresasDoUsuario(req.auth.email);
+    return res.json({ empresas });
+  }catch (error) {
+    console.error("Erro ao listar empresas do usuário:", error);
+    return res.status(500).json({
+      mensagem: "Erro interno ao listar empresas do usuário.",
+    });
+  }
+}
+
+async function entrarEmpresa(req, res){
+  try {
+    const { cnpj } = req.body;
+    if (!cnpj) {
+      return res.status(400).json({erro: "Informe a empresa"});
+    }
+
+    const empresas = await UsuarioModel.listarEmpresasDoUsuario(req.auth.email);
+    const empresa = empresas.find((e) => e.cnpj === cnpj);
+
+    if (!empresa) {
+      return res.status(403).json({erro: "Você não tem acesso a esta empresa"});
+    }
+
+    const token = gerarToken({
+      id: req.auth.email,
+      email: req.auth.email,
+      nome: req.auth.nome,
+      papel: "usuario",
+      cnpj: empresa.cnpj,
+      funcao: empresa.funcao,
+    });
+    return res.json({token,empresa})
+
+  }catch (error) {
+    console.error("Erro ao entrar na empresa:", error);
+    return res.status(500).json({
+      mensagem: "Erro interno ao entrar na empresa.",
+    });
+  }
+}
+
+module.exports = { cadastrarUsuario, listarEmpresas, entrarEmpresa };

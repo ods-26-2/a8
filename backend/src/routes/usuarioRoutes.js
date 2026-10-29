@@ -1,18 +1,16 @@
 const express = require("express");
 const router = express.Router();
 
+const { autenticar, apenasUsuario, exigirContexto } = require("../middlewares/autenticar");
 const {
-  autenticar,
-  apenasEmpresa,
-} = require("../middlewares/autenticar");
+  cadastrarUsuario,
+  listarEmpresas,
+  entrarEmpresa,
+} = require("../controllers/UsuarioController");
 
-const { cadastrarUsuario } = require("../controllers/UsuarioController.js");
+router.get("/empresas", autenticar, apenasUsuario, listarEmpresas);
+router.post("/entrar-empresa", autenticar, apenasUsuario, entrarEmpresa);
 
-router.post(
-  "/",
-  autenticar,
-  apenasEmpresa,
-  cadastrarUsuario
-);
+router.post("/", autenticar, exigirContexto("empresa", "adm"), cadastrarUsuario);
 
 module.exports = router;

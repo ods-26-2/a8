@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:3000";
+import { EmpresaVinculada } from "@/models/EmpresaVinculada";
+import { apiRequest } from "./api";
 
 type DadosUsuario = {
   nome: string;
@@ -7,32 +8,18 @@ type DadosUsuario = {
   senha: string;
 };
 
-type RespostaCadastro = {
-  mensagem: string;
-};
-
-export async function cadastrarUsuario(
-  dados: DadosUsuario,
-  token: string
-): Promise<RespostaCadastro> {
-  const resposta = await fetch(`${API_URL}/usuarios`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(dados),
-  });
-
-  const resultado = await resposta.json();
-
-  if (!resposta.ok) {
-    throw new Error(
-      resultado.mensagem ||
-        resultado.erro ||
-        "Não foi possível cadastrar o usuário."
-    );
-  }
-
-  return resultado;
+export function cadastrarUsuario(dados: DadosUsuario, _token?: string) {
+  return apiRequest<{ mensagem: string }>("/api/usuarios", "POST", dados);
 }
+
+export const usuarioService = {
+  listarEmpresas: () =>
+    apiRequest<{ empresas: EmpresaVinculada[] }>("/api/usuarios/empresas"),
+
+  entrarEmpresa: (cnpj: string) =>
+    apiRequest<{ token: string; empresa: EmpresaVinculada }>(
+      "/api/usuarios/entrar-empresa",
+      "POST",
+      { cnpj }
+    ),
+};
