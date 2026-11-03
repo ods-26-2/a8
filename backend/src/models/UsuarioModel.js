@@ -87,15 +87,38 @@ async function buscarFuncaoNaEmpresa(email, cnpj){
   return comum.length > 0 ? "comum" : null;
 }
 
+async function buscarVinculo(email, cnpj) {
+  const [rows] = await pool.query(
+    `SELECT 'adm' AS funcao, e.User_cadastra AS usuariosCadastram
+       FROM Empresa_Adm ea
+       INNER JOIN Empresa e ON e.CNPJ = ea.f_CNPJ
+      WHERE ea.f_email = ? AND ea.f_CNPJ = ?
+     UNION ALL
+     SELECT 'comum', e.User_cadastra
+       FROM Empresa_Usuario eu
+       INNER JOIN Empresa e ON e.CNPJ = eu.f_CNPJ
+      WHERE eu.f_email = ? AND eu.f_CNPJ = ?
+     ORDER BY funcao
+     LIMIT 1`,
+    [email, cnpj, email, cnpj]
+  );
+
+  if (rows.length === 0) return null;
+  return {
+    funcao: rows[0].funcao,
+    usuariosCadastram: Boolean(rows[0].usuariosCadastram),
+  };
+}
 
 async function listarEmpresasDoUsuario(email) {
   const [rows] = await pool.query(
-    `SELECT e.CNPJ AS cnpj, e.Nome AS nome, e.Tipo AS tipo, 'adm' AS funcao
+    `SELECT e.CNPJ AS cnpj, e.Nome AS nome, e.Tipo AS tipo,
+            'adm' AS funcao, e.User_cadastra AS usuariosCadastram
        FROM Empresa_Adm ea
        INNER JOIN Empresa e ON e.CNPJ = ea.f_CNPJ
       WHERE ea.f_email = ?
      UNION ALL
-     SELECT e.CNPJ, e.Nome, e.Tipo, 'comum'
+     SELECT e.CNPJ, e.Nome, e.Tipo, 'comum', e.User_cadastra
        FROM Empresa_Usuario eu
        INNER JOIN Empresa e ON e.CNPJ = eu.f_CNPJ
       WHERE eu.f_email = ?
@@ -106,7 +129,8 @@ async function listarEmpresasDoUsuario(email) {
      ORDER BY nome`,
     [email, email]
   );
-  return rows;
+
+  return rows.map((e) => ({ ...e, usuariosCadastram: Boolean(e.usuariosCadastram) }));
 }
 
 module.exports = {
@@ -114,6 +138,6 @@ module.exports = {
   buscarPorCPF,
   buscarCNPJPorEmailEmpresa,
   criar,
-  buscarFuncaoNaEmpresa,
+  buscarVinculo,
   listarEmpresasDoUsuario,
 };

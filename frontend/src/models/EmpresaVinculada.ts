@@ -7,6 +7,7 @@ export interface EmpresaVinculada {
   nome: string;
   tipo: TipoEmpresa;
   funcao: "adm" | "comum";
+  usuariosCadastram: boolean;
 }
 
 export interface EmpresaAtual{
@@ -14,4 +15,5 @@ export interface EmpresaAtual{
     nome: string;
     tipo: TipoEmpresa;
     funcao: FuncaoEmpresa;
+    usuariosCadastram: boolean;
 }

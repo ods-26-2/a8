@@ -9,6 +9,7 @@ import { SymbolView } from "expo-symbols";
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import {MeusVeiculos} from "@/components/MeusVeiculos";
 import { Footer } from "@/components/Footer";
 import { Cores } from "@/constants/parkflow";
 import { useHomeUsuarioController } from "@/controllers/useHomeUsuarioController";
@@ -90,32 +91,38 @@ export default function HomeUsuarioView() {
             <Image source={require("@/assets/images/logo.png")} style={s.logo} />
           </View>
 
-          {carregando && <ActivityIndicator color={Cores.texto} style={s.carregando} />}
+          {abaAtiva === "veiculos" ? (
+            <MeusVeiculos />
+          ) : (
+            <>
+              {carregando && <ActivityIndicator color={Cores.texto} style={s.carregando} />}
 
-          {!!erro && (
-            <Pressable onPress={recarregar}>
-              <Text style={s.erro}>{erro} Toque para tentar de novo.</Text>
-            </Pressable>
+              {!!erro && (
+                <Pressable onPress={recarregar}>
+                  <Text style={s.erro}>{erro} Toque para tentar de novo.</Text>
+                </Pressable>
+              )}
+
+              {semVinculos && (
+                <Text style={s.vazio}>Você ainda não está vinculado a nenhuma empresa ou condomínio.</Text>
+              )}
+
+              <Secao
+                titulo="Condomínio"
+                icone={{ ios: "house", android: "home", web: "home" }}
+                itens={condominios}
+                abrindo={abrindo}
+                onPress={abrirEmpresa}
+              />
+              <Secao
+                titulo="Empresa"
+                icone={{ ios: "building.2", android: "business", web: "business" }}
+                itens={empresas}
+                abrindo={abrindo}
+                onPress={abrirEmpresa}
+              />
+            </>
           )}
-
-          {semVinculos && (
-            <Text style={s.vazio}>Você ainda não está vinculado a nenhuma empresa ou condomínio.</Text>
-          )}
-
-          <Secao
-            titulo="Condomínio"
-            icone={{ ios: "house", android: "home", web: "home" }}
-            itens={condominios}
-            abrindo={abrindo}
-            onPress={abrirEmpresa}
-          />
-          <Secao
-            titulo="Empresa"
-            icone={{ ios: "building.2", android: "business", web: "business" }}
-            itens={empresas}
-            abrindo={abrindo}
-            onPress={abrirEmpresa}
-          />
         </ScrollView>
 
         <Footer abas={abas} ativa={abaAtiva} onChange={setAbaAtiva} onSair={sair} />
