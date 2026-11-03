@@ -12,7 +12,12 @@ export function useHomeEmpresaController() {
 
   // Mostra só os atalhos que a função (empresa / adm / comum) pode usar
   const funcao = empresaAtual?.funcao ?? "comum";
-  const atalhos = ATALHOS.filter((a) => ATALHOS_POR_FUNCAO[funcao].includes(a.id));
+  const atalhos = ATALHOS.filter((a) => {
+    if (ATALHOS_POR_FUNCAO[funcao].includes(a.id))
+      return true;
+
+    return a.id === "veiculos" && funcao === "comum" && !!empresaAtual?.usuariosCadastram;
+  });
 
   function abrirAtalho(id: IdAtalho) {
     switch (id) {
@@ -21,6 +26,9 @@ export function useHomeEmpresaController() {
         break;
       case "usuario":
         router.push("/cadastro-usuario");
+        break;
+      case "veiculos":
+        router.push("/veiculos-vinculados");
         break;
       default:
         console.warn("Atalho sem rota configurada:", id);

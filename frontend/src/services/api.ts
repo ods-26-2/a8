@@ -9,7 +9,7 @@ export function registrarAoSessaoExpirar(fn: (() => void) | null) {
 
 export async function apiRequest<T>(
   path: string,
-  method: "GET" | "POST" = "GET",
+  method: "GET" | "POST" | "DELETE" = "GET",
   body?: unknown
 ): Promise<T> {
   const token = await armazenamento.lerToken();

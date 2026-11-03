@@ -56,12 +56,29 @@ create table Empresa_Adm(
 create table Veiculo(
 	placa VARCHAR(7),
     fkemail VARCHAR(255),
-    
+    modelo VARCHAR(60),
+    cor VARCHAR(20),
+
     constraint Pk_Veiculo
 		primary key(placa, fkemail),
 	constraint fk_usuarioVeiculo
 		foreign key(fkemail) references Usuario(email)
 			on delete cascade on update cascade
+);
+
+CREATE TABLE IF NOT EXISTS Veiculo_Empresa (
+  placa VARCHAR(7) NOT NULL,
+  fkemail VARCHAR(255) NOT NULL,
+  f_CNPJ VARCHAR(14) NOT NULL,
+
+  CONSTRAINT Pk_VeiculoEmpresa
+    PRIMARY KEY (placa, fkemail, f_CNPJ),
+  CONSTRAINT Fk_VeiculoEmpresa_Veiculo
+    FOREIGN KEY (placa, fkemail) REFERENCES Veiculo(placa, fkemail)
+      ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT Fk_VeiculoEmpresa_Empresa
+    FOREIGN KEY (f_CNPJ) REFERENCES Empresa(CNPJ)
+      ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 create table Veiculo_Convidado(

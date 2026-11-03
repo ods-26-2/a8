@@ -33,11 +33,10 @@ function exigirContexto(...funcoesPermitidas) {
       let contexto = null;
 
       if (papel === "empresa" && cnpj) {
-        contexto = { cnpj, email: null, funcao: "empresa" };
+        contexto = { cnpj, email: null, funcao: "empresa", usuariosCadastram: true };
       } else if (papel === "usuario" && cnpj && email) {
-        // não confia só no token: reconfere o vínculo no banco
-        const funcao = await UsuarioModel.buscarFuncaoNaEmpresa(email, cnpj);
-        if (funcao) contexto = { cnpj, email, funcao };
+        const vinculo = await UsuarioModel.buscarVinculo(email,cnpj);
+        if (vinculo) contexto = { cnpj, email, funcao: vinculo.funcao, usuariosCadastram: vinculo.usuariosCadastram };
       }
 
       if (!contexto) {
@@ -56,4 +55,13 @@ function exigirContexto(...funcoesPermitidas) {
   };
 }
 
-module.exports = { autenticar, apenasUsuario, exigirContexto };
+function exigirPermissaoCadastro(req, res, next) {
+  const {funcao, usuariosCadastram} = req.contexto;
+
+  if(funcao === "comum" && !usuariosCadastram) {
+    return res.status(403).json({ erro: "Esta empresa não permite que usuários comuns cadastrem veículos." });
+  }
+  next();
+}
+
+module.exports = { autenticar, apenasUsuario, exigirContexto, exigirPermissaoCadastro };

@@ -37,7 +37,10 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
   const empresaAtual = useMemo<EmpresaAtual | null>(() => {
     if (!usuario) return null;
     if (usuario.tipo === "empresa" || usuario.tipo === "condominio") {
-      return { cnpj: usuario.cnpj ?? "", nome: usuario.nome, tipo: usuario.tipo, funcao: "empresa" };
+      return {
+        cnpj: usuario.cnpj ?? "", nome: usuario.nome, tipo: usuario.tipo,
+        funcao: "empresa", usuariosCadastram: true,
+      };
     }
     return usuario.empresaAtual ?? null;
   }, [usuario]);

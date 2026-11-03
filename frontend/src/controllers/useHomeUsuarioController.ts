@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useSessao } from "@/contexts/SessaoContext";
 import { EmpresaVinculada } from "@/models/EmpresaVinculada";
-import { ABAS, IdAba } from "@/models/HomeEmpresa";
+import { ABAS_USUARIO, IdAba } from "@/models/HomeEmpresa";
 import { usuarioService } from "@/services/usuarioService";
 
 export function useHomeUsuarioController() {
@@ -55,7 +55,7 @@ export function useHomeUsuarioController() {
     erro,
     abrirEmpresa,
     recarregar: carregar,
-    abas: ABAS,
+    abas: ABAS_USUARIO,
     abaAtiva,
     setAbaAtiva,
     sair,
