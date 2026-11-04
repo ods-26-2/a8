@@ -1,0 +1,27 @@
+{
+  "message_type": "event",
+  "message_id": "8025bf3c-52f3-491d-be06-63391569c87f",
+  "schema": "ods.i7.plate_read",
+  "schema_version": "1.0",
+  "producer": "I7",
+  "occurred_at": "2026-11-04T11:34:44.886Z",
+  "published_at": "2026-11-04T12:22:54.134Z",
+  "captured_at": "2026-11-04T11:34:44.886Z",
+  "source_id": "cam-entrada",
+  "session_id": "b2c15573-e1ac-40c0-8c88-dbf9a8720d6a",
+  "sequence": 1,
+  "artifact_version": "modelo4classesV1+cct-s-v2-global",
+  "payload": {
+    "frame_index": 1,
+    "class": "motorcycle",
+    "plate_layout": "OLD_BR",
+    "license_plate": "MSA2398",
+    "confidence": 0.62,
+    "bbox": [
+      10,
+      20,
+      200,
+      90
+    ]
+  }
+}
