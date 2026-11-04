@@ -1,6 +1,7 @@
 import { SymbolView } from "expo-symbols";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 
 import { Cores } from "@/constants/parkflow";
 import { Aba, IdAba } from "@/models/HomeEmpresa";
@@ -14,6 +15,7 @@ type Props = {
 
 export function Footer({ abas, ativa, onChange, onSair }: Props) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   return (
     <View style={[s.barra, { paddingBottom: Math.max(insets.bottom, 12) }]}>
@@ -25,7 +27,7 @@ export function Footer({ abas, ativa, onChange, onSair }: Props) {
           <Pressable
             key={aba.id}
             style={s.item}
-            onPress={() => onChange(aba.id)}
+            onPress={() => (aba.rota ? router.push(aba.rota as any) : onChange(aba.id))}
             accessibilityRole="tab"
             accessibilityState={{ selected: selecionada }}>
             <SymbolView name={aba.icone} tintColor={cor} size={24} style={s.icone} />
@@ -53,17 +55,16 @@ export function Footer({ abas, ativa, onChange, onSair }: Props) {
 }
 
 const s = StyleSheet.create({
-   barra: {
+  barra: {
     width: "100%",
     flexDirection: "row",
     backgroundColor: Cores.barra,
     paddingTop: 10,
     paddingHorizontal: 8,
-
     borderTopWidth: 1,
     borderTopColor: "#E5E5E5",
   },
-  item: { flex: 1, alignItems: "center", justifyContent: "center", gap: 4, paddingVertical: 6, },
+  item: { flex: 1, alignItems: "center", justifyContent: "center", gap: 4, paddingVertical: 6 },
   icone: { width: 24, height: 24 },
   texto: { fontSize: 11, fontFamily: "Poppins_500Medium" },
 });

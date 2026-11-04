@@ -27,6 +27,9 @@ function Rotas() {
         <Stack.Screen name="veiculos-vinculados" />
         <Stack.Screen name="cadastro-veiculo" />
       </Stack.Protected>
+      <Stack.Protected guard={logado || naEmpresa}>
+        <Stack.Screen name="perfil" />
+      </Stack.Protected>
 
       {/* Sem sessão */}
       <Stack.Protected guard={!logado}>
