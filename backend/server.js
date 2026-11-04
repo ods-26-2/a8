@@ -11,6 +11,7 @@ const usuarioRoutes = require("./src/routes/usuarioRoutes");
 const veiculoRoutes = require("./src/routes/veiculoRoutes");
 const perfilRoutes = require("./src/routes/perfilRoutes");
 const administradorRoutes = require("./src/routes/administradorRoutes");
+const { iniciarComReconexao, lerConfig } = require("./src/kafka/consumidorPlacas");
 const app = express();
 
 app.use(cors());
@@ -41,6 +42,28 @@ app.get("/api/health", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+const servidor = app.listen(PORT, () => {
   console.log(`API rodando em http://localhost:${PORT}`);
 });
+
+// Consumidor das leituras de placa (I7) via Kafka. Só liga com KAFKA_ATIVO=true.
+// Roda ao lado da API: se o broker estiver fora do ar, a API continua funcionando.
+let consumidorPlacas = null;
+const configKafka = lerConfig();
+if (configKafka.ativo) {
+  consumidorPlacas = iniciarComReconexao(configKafka);
+} else {
+  console.log("[KAFKA] consumidor desligado (defina KAFKA_ATIVO=true para ligar)");
+}
+
+// Encerra com calma (docker stop envia SIGTERM): sai do grupo do Kafka e fecha a API.
+async function encerrar() {
+  try {
+    if (consumidorPlacas) await consumidorPlacas.parar();
+  } catch (erro) {
+    console.error("[KAFKA] erro ao desconectar:", erro.message);
+  }
+  servidor.close(() => process.exit(0));
+}
+process.on("SIGTERM", encerrar);
+process.on("SIGINT", encerrar);

@@ -108,6 +108,10 @@ Principais rotas:
 | **Usuário adm** | login de usuário + escolhe a empresa | cadastra usuários, veículos e convidados da empresa |
 | **Usuário comum** | login de usuário + escolhe a empresa | cadastra convidados e, se a empresa permitir, os próprios veículos |
 
+## Leitura de placas (I7 via Kafka)
+
+O backend pode consumir as placas lidas pelo I7 (tópico `ods.i7.plate_read`) e conferir se o veículo está cadastrado (vinculado a uma empresa ou convidado no período), mostrando o resultado no log. Não grava nada no banco. Fica desligado até `KAFKA_ATIVO=true` no `backend/.env`. A regra ainda não filtra por empresa (provisório). Passo a passo e variáveis em [`docs/kafka.md`](docs/kafka.md). Testes: `cd backend && npm test`.
+
 ## Convenções do repositório
 
 - `main` é a branch estável; o desenvolvimento acontece em outras branches e entra na `main` por Pull Request.
@@ -117,3 +121,4 @@ Principais rotas:
 ## Documentação
 
 - [`docs/docker.md`](docs/docker.md): containers, comandos do dia a dia, banco de dados e solução de problemas.
+- [`docs/kafka.md`](docs/kafka.md): consumidor das leituras de placa do I7 (configuração, regra de conferência e testes).
