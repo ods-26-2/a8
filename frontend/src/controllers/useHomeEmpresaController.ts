@@ -2,7 +2,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 
 import { useSessao } from "@/contexts/SessaoContext";
-import { ABAS, ATALHOS, ATALHOS_POR_FUNCAO, IdAba, IdAtalho } from "@/models/HomeEmpresa";
+import { ATALHOS, ATALHOS_POR_FUNCAO, IdAba, IdAtalho, abasPorFuncao } from "@/models/HomeEmpresa";
 
 export function useHomeEmpresaController() {
   const router = useRouter();
@@ -30,6 +30,9 @@ export function useHomeEmpresaController() {
       case "veiculos":
         router.push("/veiculos-vinculados");
         break;
+      case "administrador":
+        router.push("/cadastro-administrador" as any);
+        break;
       default:
         console.warn("Atalho sem rota configurada:", id);
     }
@@ -40,7 +43,7 @@ export function useHomeEmpresaController() {
     podeTrocarEmpresa: usuario?.tipo === "usuario",
     trocarEmpresa: voltarParaEmpresas,
     atalhos,
-    abas: ABAS,
+    abas: abasPorFuncao(funcao),
     abaAtiva,
     setAbaAtiva,
     abrirAtalho,

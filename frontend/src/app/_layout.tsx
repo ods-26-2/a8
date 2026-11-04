@@ -26,6 +26,7 @@ function Rotas() {
         <Stack.Screen name="cadastro-usuario" />
         <Stack.Screen name="veiculos-vinculados" />
         <Stack.Screen name="cadastro-veiculo" />
+        <Stack.Screen name="cadastro-administrador" />
       </Stack.Protected>
 
       {/* Sem sessão */}
