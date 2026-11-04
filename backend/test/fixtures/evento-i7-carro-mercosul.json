@@ -2,7 +2,7 @@
   "message_type": "event",
   "message_id": "c0c107a3-9199-489e-b227-f9b7ff6bda97",
   "schema": "ods.i7.plate_read",
-  "schema_version": "1.1",
+  "schema_version": "1.0",
   "producer": "I7",
   "occurred_at": "2026-11-04T11:34:44.886Z",
   "published_at": "2026-11-04T11:34:44.886Z",
