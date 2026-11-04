@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { fazerLogin } from "../services/loginService";
-import { router } from "expo-router";
+import { useSessao } from "@/contexts/SessaoContext";
 
 export function useLoginController() {
+  const {entrar: abrirSessao} = useSessao();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
 
+  
   async function entrar() {
     setErro("");
 
@@ -20,25 +22,33 @@ export function useLoginController() {
     try {
       setCarregando(true);
 
-      const resultado = await fazerLogin({
+      const { token, usuario } = await fazerLogin({
         email: email.trim(),
         senha,
       });
 
-      console.log("Login realizado com sucesso:");
-      console.log(resultado);
+      const tiposPermitidos = [
+        "empresa",
+        "condominio",
+        "usuario",
+        "empresa_adm",
+        "empresa_usuario",
+      ];
 
-      router.replace("/home-empresa");
+      if (!tiposPermitidos.includes(usuario.tipo)) {
+        setErro("Tipo de usuário não permitido.");
+        return;
+      }
+
+      await abrirSessao(token, usuario);
     } catch (error: any) {
       console.error("Erro no login:", error);
-
-      setErro(
-        error.message || "Não foi possível realizar o login."
-      );
+      setErro(error.message || "Não foi possível realizar o login.");
     } finally {
       setCarregando(false);
     }
   }
+
 
   return {
     email,

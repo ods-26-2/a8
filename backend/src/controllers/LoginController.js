@@ -1,7 +1,8 @@
 const pool = require("../config/database");
 const bcrypt = require("bcrypt");
+const { gerarToken } = require("../utils/token");
 
-// Login
+
 async function fazerLogin(req, res) {
   try {
     const { email, senha } = req.body;
@@ -49,16 +50,27 @@ async function fazerLogin(req, res) {
         });
       }
 
-      return res.status(200).json({
-        mensagem: "Login realizado com sucesso",
+      
+    const token = gerarToken({
+      id: empresa.CNPJ,
+      cnpj: empresa.CNPJ,
+      papel: "empresa",
+      tipo,
+      podeCadastrarUsuarios:
+        Boolean(empresa.User_cadastra),
+    });
 
-        usuario: {
-          email: empresa.email,
-          nome: empresa.Nome,
-          cnpj: empresa.CNPJ,
-          tipo: tipo,
-        },
-      });
+    return res.status(200).json({
+      mensagem: "Login realizado com sucesso",
+      token,
+      usuario: {
+        email: empresa.email,
+        nome: empresa.Nome,
+        cnpj: empresa.CNPJ,
+        tipo,
+      },
+    });
+
     }
 
     // =====================================================
@@ -75,95 +87,23 @@ async function fazerLogin(req, res) {
     if (usuarios.length > 0) {
       const usuario = usuarios[0];
 
-      // Verifica a senha
-      const senhaCorreta = await bcrypt.compare(
-        senha,
-        usuario.senha
-      );
+      const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
 
       if (!senhaCorreta) {
-        return res.status(401).json({
-          erro: "Email ou senha inválidos",
-        });
+        return res.status(401).json({ erro: "Email ou senha inválidos" });
       }
 
-      // =====================================================
-      // 3. VERIFICA SE É ADMINISTRADOR DE UMA EMPRESA
-      // =====================================================
-
-      const [empresaAdm] = await pool.query(
-        `SELECT 
-           ea.f_CNPJ,
-           e.Nome,
-           e.Tipo
-         FROM Empresa_Adm ea
-         INNER JOIN Empresa e
-           ON ea.f_CNPJ = e.CNPJ
-         WHERE ea.f_email = ?`,
-        [email]
-      );
-
-      if (empresaAdm.length > 0) {
-        return res.status(200).json({
-          mensagem: "Login realizado com sucesso",
-
-          usuario: {
-            email: usuario.email,
-            nome: usuario.Nome,
-            cpf: usuario.CPF,
-            tipo: "empresa_adm",
-
-            empresas: empresaAdm.map((empresa) => ({
-              cnpj: empresa.f_CNPJ,
-              nome: empresa.Nome,
-              tipo: empresa.Tipo,
-            })),
-          },
-        });
-      }
-
-      // =====================================================
-      // 4. VERIFICA SE É USUÁRIO DE UMA EMPRESA
-      // =====================================================
-
-      const [empresaUsuario] = await pool.query(
-        `SELECT 
-           eu.f_CNPJ,
-           e.Nome,
-           e.Tipo
-         FROM Empresa_Usuario eu
-         INNER JOIN Empresa e
-           ON eu.f_CNPJ = e.CNPJ
-         WHERE eu.f_email = ?`,
-        [email]
-      );
-
-      if (empresaUsuario.length > 0) {
-        return res.status(200).json({
-          mensagem: "Login realizado com sucesso",
-
-          usuario: {
-            email: usuario.email,
-            nome: usuario.Nome,
-            cpf: usuario.CPF,
-            tipo: "empresa_usuario",
-
-            empresas: empresaUsuario.map((empresa) => ({
-              cnpj: empresa.f_CNPJ,
-              nome: empresa.Nome,
-              tipo: empresa.Tipo,
-            })),
-          },
-        });
-      }
-
-      // =====================================================
-      // 5. USUÁRIO COMUM
-      // =====================================================
+      // PK do usuário (email) e nome vão no token
+      const token = gerarToken({
+        id: usuario.email,
+        email: usuario.email,
+        nome: usuario.Nome,
+        papel: "usuario",
+      });
 
       return res.status(200).json({
         mensagem: "Login realizado com sucesso",
-
+        token,
         usuario: {
           email: usuario.email,
           nome: usuario.Nome,
@@ -172,10 +112,6 @@ async function fazerLogin(req, res) {
         },
       });
     }
-
-    // =====================================================
-    // 6. EMAIL NÃO ENCONTRADO
-    // =====================================================
 
     return res.status(401).json({
       erro: "Email ou senha inválidos",

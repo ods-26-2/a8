@@ -31,5 +31,5 @@ const s = StyleSheet.create({
   },
   pressionado: { backgroundColor: Cores.cartaoPressionado },
   icone: { width: 44, height: 44 },
-  titulo: { color: Cores.botaoTexto, fontSize: 15, fontFamily: "Poppins_600SemiBold" },
+  titulo: { color: Cores.botaoTexto, fontSize: 15, fontFamily: "Poppins_600SemiBold", textAlign: "center", paddingHorizontal: 8 },
 });
