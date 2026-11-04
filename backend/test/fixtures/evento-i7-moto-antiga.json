@@ -1,27 +1,38 @@
 {
   "message_type": "event",
-  "message_id": "8025bf3c-52f3-491d-be06-63391569c87f",
+  "message_id": "69f02894-e546-48de-8667-9e0b12e5c6fd",
   "schema": "ods.i7.plate_read",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "producer": "I7",
   "occurred_at": "2026-11-04T11:34:44.886Z",
-  "published_at": "2026-11-04T12:22:54.134Z",
+  "published_at": "2026-11-04T11:34:44.886Z",
   "captured_at": "2026-11-04T11:34:44.886Z",
   "source_id": "cam-entrada",
-  "session_id": "b2c15573-e1ac-40c0-8c88-dbf9a8720d6a",
-  "sequence": 1,
+  "session_id": "d5abb170-701f-4543-9391-fc4a5f190112",
+  "sequence": 0,
   "artifact_version": "modelo4classesV1+cct-s-v2-global",
   "payload": {
     "frame_index": 1,
+    "detection_id": 0,
     "class": "motorcycle",
     "plate_layout": "OLD_BR",
     "license_plate": "MSA2398",
     "confidence": 0.62,
+    "character_confidences": [
+      0.95,
+      0.9,
+      0.62,
+      0.97,
+      0.96,
+      0.98,
+      0.99
+    ],
+    "uncertain": true,
     "bbox": [
-      10,
-      20,
+      300,
       200,
-      90
+      380,
+      260
     ]
   }
 }
