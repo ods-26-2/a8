@@ -1,0 +1,20 @@
+# Ponte para o Kafka da Jetson (uso opcional, sempre com -f).
+#
+# Por que existe: o broker da Jetson anuncia "localhost:9092" (advertised.listeners). Dentro do
+# container do backend, "localhost" é o próprio container, e a conexão falha. Esta ponte (socat)
+# divide a rede do backend, responde em localhost:9092 e repassa para a Jetson.
+# Quando o advertised.listeners for corrigido no broker, este arquivo deixa de ser necessário.
+#
+# Uso (sempre os dois -f; não use "restart backend", que quebra a ponte):
+#   docker compose -f docker-compose.yml -f docker-compose.ponte.yml up -d --force-recreate backend kafka-ponte
+#
+# Alvo da ponte (padrão: endereço público da Jetson, para quem está fora do Dcomp, como a nuvem).
+# Dentro do Dcomp, use o privado:  KAFKA_ALVO=172.18.4.56:9092 docker compose -f ... up -d ...
+# No backend/.env, KAFKA_BROKER deve apontar para o mesmo endereço do alvo.
+services:
+  kafka-ponte:
+    image: alpine/socat
+    network_mode: "service:backend"
+    command: TCP-LISTEN:9092,fork,reuseaddr TCP:${KAFKA_ALVO:-200.17.66.56:9092}
+    depends_on:
+      - backend
