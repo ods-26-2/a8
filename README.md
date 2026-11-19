@@ -24,7 +24,9 @@ a8/
 │   └── src/              app (rotas), view, controllers, models, services, components, contexts
 ├── docs/                 documentação aprofundada (ver docs/docker.md)
 ├── database.sql          criação das tabelas
-└── docker-compose.yml
+├── docker-compose.yml
+├── docker-compose.ponte.yml   opcional: ponte para o Kafka da Jetson (ver docs/kafka.md)
+└── docker-compose.rede.yml    opcional: troca a faixa da rede do Compose (ver docs/docker.md)
 ```
 
 O frontend segue o padrão **model → service → controller (hook) → view**, e cada rota em `src/app/` apenas reexporta uma view.
@@ -33,7 +35,7 @@ O frontend segue o padrão **model → service → controller (hook) → view**,
 
 **Pré-requisito:** Docker Engine ou Docker Desktop instalado e rodando.
 
-**1. Crie o arquivo `backend/.env`** (ele não vai para o repositório, cada pessoa cria o seu):
+**1. Crie o arquivo `backend/.env`** (ele não vai para o repositório, cada pessoa cria o seu). Copie o modelo com `cp backend/.env.example backend/.env` ou use o mínimo abaixo:
 
 ```env
 PORT=3000
@@ -110,7 +112,7 @@ Principais rotas:
 
 ## Leitura de placas (I7 via Kafka)
 
-O backend pode consumir as placas lidas pelo I7 (tópico `ods.i7.plate_read`) e conferir se o veículo está cadastrado (vinculado a uma empresa ou convidado no período), mostrando o resultado no log. Não grava nada no banco. Fica desligado até `KAFKA_ATIVO=true` no `backend/.env`. A regra ainda não filtra por empresa (provisório). Passo a passo e variáveis em [`docs/kafka.md`](docs/kafka.md). Testes: `cd backend && npm test`.
+O backend pode consumir as placas lidas pelo I7 (tópico `ods.i7.plate_read`) e conferir se o veículo está cadastrado (vinculado a uma empresa ou convidado no período), mostrando o resultado no log. Não grava nada no banco. Fica desligado até `KAFKA_ATIVO=true` no `backend/.env`. A regra ainda não filtra por empresa (provisório). O broker atual é o da Jetson (`200.17.66.56:9092` de fora do Dcomp, `172.18.4.56:9092` de dentro) e, por enquanto, exige a ponte `docker-compose.ponte.yml`. Passo a passo e variáveis em [`docs/kafka.md`](docs/kafka.md). Testes: `cd backend && npm test`.
 
 ## Convenções do repositório
 

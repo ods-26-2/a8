@@ -21,6 +21,22 @@ Pontos importantes:
 - Dentro da rede do Docker, os serviços se encontram pelo **nome do serviço**. Por isso o backend acessa o banco em `mysql`, e não em `localhost`.
 - O banco **não** é acessível de fora do Docker (porta não publicada). Veja a seção 5 se precisar de um cliente como Workbench.
 
+**Arquivos opcionais do Compose.** Só valem quando incluídos com `-f` (o `docker compose` sozinho os ignora):
+
+| Arquivo | Quando usar | O que faz |
+|---|---|---|
+| `docker-compose.ponte.yml` | consumidor Kafka ligado no broker da Jetson | sobe o serviço `kafka-ponte` (`socat`), necessário enquanto o broker anunciar `localhost:9092`. Detalhes em [`kafka.md`](kafka.md), seção 1.4 |
+| `docker-compose.rede.yml` | computador que precisa alcançar a Jetson pelo endereço privado `172.18.4.56` (laboratório, a própria Jetson) | muda a rede do Compose para `10.187.43.0/24`. Sem isso, o Docker costuma criar a rede em `172.18.0.0/16`, a mesma faixa da Jetson, e os containers não a alcançam |
+
+```bash
+# nuvem (endereço público da Jetson)
+docker compose -f docker-compose.yml -f docker-compose.ponte.yml up -d --force-recreate backend kafka-ponte
+# dentro do Dcomp (endereço privado)
+KAFKA_ALVO=172.18.4.56:9092 docker compose -f docker-compose.yml -f docker-compose.ponte.yml -f docker-compose.rede.yml up -d --force-recreate
+```
+
+Ao usar o `docker-compose.rede.yml` pela primeira vez, rode antes `docker compose down` (sem `-v`): uma rede que já existe não muda de faixa.
+
 ## 2. Pré-requisitos
 
 - Docker Engine ou Docker Desktop instalado e **rodando** (nos computadores do lab já vem configurado).
@@ -35,7 +51,7 @@ docker compose version
 
 ## 3. Primeira execução
 
-**3.1. Crie `backend/.env`.** Ele está no `.gitignore`, então cada pessoa cria o seu:
+**3.1. Crie `backend/.env`.** Ele está no `.gitignore`, então cada pessoa cria o seu. O jeito mais rápido é copiar o modelo (`cp backend/.env.example backend/.env`), que já traz as variáveis do Kafka ([`kafka.md`](kafka.md)). O mínimo é:
 
 ```env
 PORT=3000
@@ -152,12 +168,9 @@ Isso também só vale para bancos criados do zero.
 ## 6. Frontend no Docker
 
 - O app abre no navegador em http://localhost:8081.
-- O endereço da API usado pelo app vem de `EXPO_PUBLIC_API_URL`. Se a variável não existir, o app usa `http://localhost:3000`, que funciona no navegador do mesmo PC.
-- O arquivo `frontend/.env.local` **não entra na imagem** (está no `.dockerignore`). Para mudar o endereço da API dentro do Docker, defina a variável no serviço `frontend` do compose:
-  ```yaml
-      environment:
-        EXPO_PUBLIC_API_URL: http://localhost:3000
-  ```
+- O endereço da API usado pelo app vem de `EXPO_PUBLIC_API_URL`, definida no serviço `frontend` do compose como `${EXPO_PUBLIC_API_URL:-http://34.95.227.33:3000}`: sem configuração, o app usa o backend da nuvem.
+- Para usar um backend local, crie um `.env` **na raiz** do projeto (ao lado do `docker-compose.yml`), a partir do `.env.example`: `EXPO_PUBLIC_API_URL=http://localhost:3000`. O Compose lê esse arquivo sozinho; ele não vai para o repositório. Depois: `docker compose up -d --force-recreate frontend`.
+- O arquivo `frontend/.env.local` **não entra na imagem** (está no `.dockerignore`), e o `frontend/.env` não vale no Docker, porque o valor vem do compose. Para conferir o valor recebido: `docker compose exec frontend env | grep EXPO_PUBLIC_API_URL`.
 - **Celular (Expo Go):** `localhost` no celular é o próprio celular. Use o IP do PC na rede (ex.: `192.168.0.10`) em `EXPO_PUBLIC_API_URL: http://192.168.0.10:3000` e informe também `REACT_NATIVE_PACKAGER_HOSTNAME: 192.168.0.10` para o QR code apontar para o PC. PC e celular precisam estar na mesma rede.
 
 ## 7. Solução de problemas
@@ -175,6 +188,11 @@ Isso também só vale para bancos criados do zero.
 | `Operador '<' reservado para uso futuro` | `<` não existe no PowerShell | usar `Get-Content arquivo.sql \| docker exec -i ...` |
 | Hash com `$` quebrado ao inserir senha pelo PowerShell | o `$` é tratado como variável em strings com aspas duplas | colocar o SQL num arquivo `.sql`, ou usar aspas simples |
 | `docker: error during connect` | o Docker Desktop não está rodando | abrir o Docker Desktop e esperar iniciar |
+| `[KAFKA] ... broker: "localhost:9092" ... ECONNREFUSED` | o broker da Jetson anuncia `localhost:9092` e a ponte não está ativa | subir com `-f docker-compose.ponte.yml` e recriar backend e ponte juntos ([`kafka.md`](kafka.md), seção 1.4) |
+| O erro acima voltou depois de `docker compose restart backend` | a ponte ficou presa à rede antiga do backend | `docker compose -f docker-compose.yml -f docker-compose.ponte.yml up -d --force-recreate backend kafka-ponte` |
+| Timeout ou `Connection timed out` para `172.18.4.56` dentro do container, mas o PC alcança | a rede do Compose está em `172.18.0.0/16` | usar `-f docker-compose.rede.yml` (seção 1), depois de `docker compose down` |
+| `Pool overlaps with other one on this address space` | a faixa do `docker-compose.rede.yml` colide com outra rede do Docker | trocar o terceiro número da faixa no arquivo (ex.: `10.187.88.0/24`) e subir de novo |
+| `[KAFKA]` com `Table 'a8.Veiculo_Empresa' doesn't exist` | banco novo sem as tabelas | seção 3.3 e recriar backend e ponte |
 
 ## 8. Referência rápida
 
