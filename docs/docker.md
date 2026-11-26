@@ -25,11 +25,11 @@ Pontos importantes:
 
 | Arquivo | Quando usar | O que faz |
 |---|---|---|
-| `docker-compose.ponte.yml` | consumidor Kafka ligado no broker da Jetson | sobe o serviço `kafka-ponte` (`socat`), necessário enquanto o broker anunciar `localhost:9092`. Detalhes em [`kafka.md`](kafka.md), seção 1.4 |
+| `docker-compose.ponte.yml` | só para testes com o consumidor Kafka ligado no broker **local da Jetson** (na homologação, com o Kafka da nuvem, não é usado) | sobe o serviço `kafka-ponte` (`socat`), necessário enquanto o broker anunciar `localhost:9092`. Detalhes em [`kafka.md`](kafka.md), seção 1.4 |
 | `docker-compose.rede.yml` | computador que precisa alcançar a Jetson pelo endereço privado `172.18.4.56` (laboratório, a própria Jetson) | muda a rede do Compose para `10.187.43.0/24`. Sem isso, o Docker costuma criar a rede em `172.18.0.0/16`, a mesma faixa da Jetson, e os containers não a alcançam |
 
 ```bash
-# nuvem (endereço público da Jetson)
+# Kafka da Jetson, de fora do Dcomp (endereço público)
 docker compose -f docker-compose.yml -f docker-compose.ponte.yml up -d --force-recreate backend kafka-ponte
 # dentro do Dcomp (endereço privado)
 KAFKA_ALVO=172.18.4.56:9092 docker compose -f docker-compose.yml -f docker-compose.ponte.yml -f docker-compose.rede.yml up -d --force-recreate
@@ -169,7 +169,8 @@ Isso também só vale para bancos criados do zero.
 
 - O app abre no navegador em http://localhost:8081.
 - O endereço da API usado pelo app vem de `EXPO_PUBLIC_API_URL`, definida no serviço `frontend` do compose como `${EXPO_PUBLIC_API_URL:-http://34.95.227.33:3000}`: sem configuração, o app usa o backend da nuvem.
-- Para usar um backend local, crie um `.env` **na raiz** do projeto (ao lado do `docker-compose.yml`), a partir do `.env.example`: `EXPO_PUBLIC_API_URL=http://localhost:3000`. O Compose lê esse arquivo sozinho; ele não vai para o repositório. Depois: `docker compose up -d --force-recreate frontend`.
+- **Na máquina da nuvem, não crie o `.env` da raiz.** Se ele existir com `localhost`, o navegador de quem acessa o app procura o backend no próprio computador e o cadastro falha com `NetworkError` / "requisição cross-origin bloqueada" (status null), mesmo com o `/api/health` respondendo. Para corrigir: apague o `.env` da raiz (ou ponha nele o IP da nuvem), `docker compose up -d --force-recreate frontend` e recarregue a página sem cache (Ctrl+F5).
+- Para usar um backend local, crie um `.env` **na raiz** do projeto (ao lado do `docker-compose.yml`), a partir do modelo `rodar-local.env.example` (`cp rodar-local.env.example .env`; o nome precisa ser exatamente `.env`): `EXPO_PUBLIC_API_URL=http://localhost:3000`. O Compose lê esse arquivo sozinho; ele não vai para o repositório. Depois: `docker compose up -d --force-recreate frontend`.
 - O arquivo `frontend/.env.local` **não entra na imagem** (está no `.dockerignore`), e o `frontend/.env` não vale no Docker, porque o valor vem do compose. Para conferir o valor recebido: `docker compose exec frontend env | grep EXPO_PUBLIC_API_URL`.
 - **Celular (Expo Go):** `localhost` no celular é o próprio celular. Use o IP do PC na rede (ex.: `192.168.0.10`) em `EXPO_PUBLIC_API_URL: http://192.168.0.10:3000` e informe também `REACT_NATIVE_PACKAGER_HOSTNAME: 192.168.0.10` para o QR code apontar para o PC. PC e celular precisam estar na mesma rede.
 
@@ -188,6 +189,9 @@ Isso também só vale para bancos criados do zero.
 | `Operador '<' reservado para uso futuro` | `<` não existe no PowerShell | usar `Get-Content arquivo.sql \| docker exec -i ...` |
 | Hash com `$` quebrado ao inserir senha pelo PowerShell | o `$` é tratado como variável em strings com aspas duplas | colocar o SQL num arquivo `.sql`, ou usar aspas simples |
 | `docker: error during connect` | o Docker Desktop não está rodando | abrir o Docker Desktop e esperar iniciar |
+| `[KAFKA] ... This server does not host this topic-partition` | o tópico `ods.i7.plate_read` não existe no broker | criar o tópico pelo I7 (`publicador_eventos.py --criar-topico`) e recriar o backend ([`kafka.md`](kafka.md), seção 1.3) |
+| `docker exec a8-backend printenv KAFKA_BROKER` mostra o endereço antigo | o `backend/.env` não mudou, ou o container veio de outra pasta | conferir o arquivo e recriar com `docker compose up -d --force-recreate backend` na pasta certa |
+| App: `NetworkError` / cross-origin bloqueado chamando `localhost:3000` | `.env` da raiz com `localhost` na máquina da nuvem | seção 6 |
 | `[KAFKA] ... broker: "localhost:9092" ... ECONNREFUSED` | o broker da Jetson anuncia `localhost:9092` e a ponte não está ativa | subir com `-f docker-compose.ponte.yml` e recriar backend e ponte juntos ([`kafka.md`](kafka.md), seção 1.4) |
 | O erro acima voltou depois de `docker compose restart backend` | a ponte ficou presa à rede antiga do backend | `docker compose -f docker-compose.yml -f docker-compose.ponte.yml up -d --force-recreate backend kafka-ponte` |
 | Timeout ou `Connection timed out` para `172.18.4.56` dentro do container, mas o PC alcança | a rede do Compose está em `172.18.0.0/16` | usar `-f docker-compose.rede.yml` (seção 1), depois de `docker compose down` |
