@@ -25,7 +25,7 @@ a8/
 ├── docs/                 documentação aprofundada (ver docs/docker.md)
 ├── database.sql          criação das tabelas
 ├── docker-compose.yml
-├── docker-compose.ponte.yml   opcional: ponte para o Kafka da Jetson (ver docs/kafka.md)
+├── docker-compose.ponte.yml   opcional: ponte para testes no Kafka local da Jetson (ver docs/kafka.md)
 └── docker-compose.rede.yml    opcional: troca a faixa da rede do Compose (ver docs/docker.md)
 ```
 
@@ -112,7 +112,7 @@ Principais rotas:
 
 ## Leitura de placas (I7 via Kafka)
 
-O backend pode consumir as placas lidas pelo I7 (tópico `ods.i7.plate_read`) e conferir se o veículo está cadastrado (vinculado a uma empresa ou convidado no período), mostrando o resultado no log. Não grava nada no banco. Fica desligado até `KAFKA_ATIVO=true` no `backend/.env`. A regra ainda não filtra por empresa (provisório). O broker atual é o da Jetson (`200.17.66.56:9092` de fora do Dcomp, `172.18.4.56:9092` de dentro) e, por enquanto, exige a ponte `docker-compose.ponte.yml`. Passo a passo e variáveis em [`docs/kafka.md`](docs/kafka.md). Testes: `cd backend && npm test`.
+O backend pode consumir as placas lidas pelo I7 (tópico `ods.i7.plate_read`) e conferir se o veículo está cadastrado (vinculado a uma empresa ou convidado no período), mostrando o resultado no log. Não grava nada no banco. Fica desligado até `KAFKA_ATIVO=true` no `backend/.env`. A regra ainda não filtra por empresa (provisório). Na homologação, o broker é o **Kafka da nuvem** (`34.66.235.91:9093`): o I7 roda na Jetson e publica nele, e o A8 consome da nuvem, sem ponte. O Kafka local da Jetson só serve para testes. Passo a passo e variáveis em [`docs/kafka.md`](docs/kafka.md). Testes: `cd backend && npm test`.
 
 ## Convenções do repositório
 

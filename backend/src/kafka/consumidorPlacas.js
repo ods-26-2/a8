@@ -21,7 +21,7 @@ function lerConfig(env = process.env) {
   const confiancaMinima = Number(env.PLACA_CONFIANCA_MINIMA ?? 0.9);
   return {
     ativo: String(env.KAFKA_ATIVO).toLowerCase() === "true",
-    broker: env.KAFKA_BROKER || "200.17.66.56:9092", // Jetson, endereço público (dentro do Dcomp: 172.18.4.56:9092); temporário
+    broker: env.KAFKA_BROKER || "34.66.235.91:9093", // Kafka da nuvem (homologação); configure sempre no .env
     topico: env.KAFKA_TOPICO || "ods.i7.plate_read",
     groupId: env.KAFKA_GROUP_ID || "A8-acesso", // cada componente consumidor usa o seu
     // false: um group.id novo começa nas mensagens NOVAS; true: relê o tópico desde o início

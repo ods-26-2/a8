@@ -17,7 +17,7 @@ O consumidor roda dentro do próprio backend (`backend/src/kafka/`). Ele fica **
 | Variável | Padrão | O que faz |
 |---|---|---|
 | `KAFKA_ATIVO` | `false` | `true` liga o consumidor |
-| `KAFKA_BROKER` | `200.17.66.56:9092` | Endereço do broker. Hoje é o da **Jetson**: `172.18.4.56:9092` de dentro da rede do Dcomp, `200.17.66.56:9092` de fora (por exemplo, na nuvem). É temporário e compartilhado por todas as squads; na versão final será local. Veja a seção 1.4 |
+| `KAFKA_BROKER` | `34.66.235.91:9093` | Endereço do broker. Na homologação é o **Kafka da nuvem** (`34.66.235.91:9093`): o I7 roda na Jetson e publica nele, e o A8, na nuvem, consome. É compartilhado por todas as squads. O Kafka local da Jetson só serve para testes (seção 1.4) |
 | `KAFKA_TOPICO` | `ods.i7.plate_read` | Tópico a consumir (também é o `schema` esperado no evento) |
 | `KAFKA_GROUP_ID` | `A8-acesso` | Identifica este componente. Cada consumidor usa o seu, para um não atrapalhar a leitura do outro |
 | `KAFKA_DESDE_O_INICIO` | `false` | `false`: um `group.id` novo lê só as mensagens **novas**. `true`: relê o tópico inteiro (inclui eventos de teste do I7) |
@@ -27,8 +27,7 @@ O consumidor roda dentro do próprio backend (`backend/src/kafka/`). Ele fica **
 
 ```env
 KAFKA_ATIVO=true
-# fora do Dcomp (nuvem); dentro do Dcomp use 172.18.4.56:9092
-KAFKA_BROKER=200.17.66.56:9092
+KAFKA_BROKER=34.66.235.91:9093
 KAFKA_TOPICO=ods.i7.plate_read
 ```
 
@@ -39,27 +38,33 @@ cd backend
 npm install
 ```
 
-**1.3. Reconstrua o backend** (o código novo só entra na imagem com `--build`). Com o broker da Jetson, inclua a ponte (seção 1.4):
+**1.3. Reconstrua o backend** (o código novo só entra na imagem com `--build`; depois de mudar só o `backend/.env`, basta `--force-recreate`). Com o Kafka da nuvem não há ponte:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.ponte.yml up -d --build --force-recreate backend kafka-ponte
+docker compose up -d --build --force-recreate backend
 ```
 
 No log (`docker logs a8-backend --tail 20`) deve aparecer:
 
 ```
-[KAFKA] consumidor ativo: tópico ods.i7.plate_read em 200.17.66.56:9092 (group.id A8-acesso, só mensagens novas)
+[KAFKA] consumidor ativo: tópico ods.i7.plate_read em 34.66.235.91:9093 (group.id A8-acesso, só mensagens novas)
 ```
+
+Para conferir o endereço que o container recebeu: `docker exec a8-backend printenv KAFKA_BROKER`. Se ainda mostrar o antigo, o container não foi recriado a partir desta pasta (ou o `backend/.env` não mudou).
+
+**Voltando do broker da Jetson para o da nuvem:** troque o `KAFKA_BROKER` no `backend/.env`, remova a ponte (`docker rm -f a8-kafka-ponte-1`, ou o nome que o `docker ps` mostrar) e recrie o backend só com o compose principal, como acima. Daí em diante, use os comandos sem o `-f docker-compose.ponte.yml`.
+
+**Tópico inexistente:** se o log mostrar `This server does not host this topic-partition`, o tópico `ods.i7.plate_read` ainda não existe no broker. O I7 o cria (`scripts/publicador_eventos.py --criar-topico`, no repositório do I7); depois, recrie o backend.
 
 Para acompanhar as leituras em tempo real: `docker logs -f --tail 20 a8-backend` (Ctrl+C só fecha a visualização; o consumidor continua).
 
 Não há migração de banco para esta integração.
 
-**1.4. Broker da Jetson e a ponte (`docker-compose.ponte.yml`).** O broker da Jetson anuncia o endereço `localhost:9092` (configuração `advertised.listeners`). O cliente conecta no `KAFKA_BROKER`, recebe esse endereço e passa a usá-lo; dentro do container, `localhost` é o próprio backend, e o log mostra `Connection error ... broker: "localhost:9092" ... ECONNREFUSED`. Enquanto o broker não for corrigido, a ponte resolve: um container `socat` que divide a rede do backend, responde em `localhost:9092` e repassa para a Jetson.
+**1.4. Só para testes no Kafka local da Jetson: a ponte (`docker-compose.ponte.yml`).** Na homologação o A8 usa o Kafka da nuvem e nada desta seção é necessário. O broker da Jetson anuncia o endereço `localhost:9092` (configuração `advertised.listeners`). O cliente conecta no `KAFKA_BROKER`, recebe esse endereço e passa a usá-lo; dentro do container, `localhost` é o próprio backend, e o log mostra `Connection error ... broker: "localhost:9092" ... ECONNREFUSED`. Enquanto o broker não for corrigido, a ponte resolve: um container `socat` que divide a rede do backend, responde em `localhost:9092` e repassa para a Jetson.
 
-- Use **sempre** os dois `-f` (comando do 1.3). Sem o segundo, a ponte não sobe e o erro volta.
+- Suba com os dois `-f`: `docker compose -f docker-compose.yml -f docker-compose.ponte.yml up -d --build --force-recreate backend kafka-ponte`. Sem o segundo, a ponte não sobe e o erro volta.
 - Não use `docker compose restart backend`: a ponte fica presa à rede antiga do container. Recrie os dois juntos (`--force-recreate backend kafka-ponte`).
-- O alvo da ponte é o endereço público (`200.17.66.56:9092`), o certo para a nuvem. Dentro do Dcomp, use o privado nos dois lugares: `KAFKA_BROKER=172.18.4.56:9092` no `backend/.env` e `KAFKA_ALVO=172.18.4.56:9092` antes do comando (`KAFKA_ALVO=172.18.4.56:9092 docker compose -f ... up -d ...`).
+- O alvo da ponte é o endereço público da Jetson (`200.17.66.56:9092`), para quem está fora do Dcomp. Dentro do Dcomp, use o privado nos dois lugares: `KAFKA_BROKER=172.18.4.56:9092` no `backend/.env` e `KAFKA_ALVO=172.18.4.56:9092` antes do comando (`KAFKA_ALVO=172.18.4.56:9092 docker compose -f ... up -d ...`).
 - Usando o endereço privado, a rede do Compose não pode estar na faixa `172.18.0.0/16`, senão o container não alcança a Jetson. Acrescente `-f docker-compose.rede.yml` (veja [`docker.md`](docker.md), seção 1).
 - Antes de subir, confira se a máquina alcança o broker: `nc -zv -w 5 200.17.66.56 9092` (ou o privado, dentro do Dcomp).
 
@@ -92,7 +97,7 @@ Quando o resultado é `liberado`, o consumidor também **aciona a cancela** da c
 - **Valida antes de usar** (guia do Kafka, seção 4.3): campos obrigatórios do envelope, `schema` e versão (`1.x`), estrutura do payload e formato da placa (Mercosul `AAA9A99` ou antiga `AAA9999`). Mensagem inválida é **descartada** e o motivo vai para o log (`[KAFKA] mensagem descartada: ...`).
 - **Duplicatas não fazem mal:** como nada é gravado, receber o mesmo evento duas vezes só repete a linha do log (guia, seção 4.4).
 - **Não perde leitura:** se o banco falhar, o erro não é engolido; o Kafka não confirma a mensagem e ela é lida de novo depois.
-- **Cuidado com os créditos do broker** (guia, seção 4.5): se a conexão cair, as novas tentativas esperam cada vez mais (de 0,5 s até 60 s), e não há polling em laço apertado. Se o broker estiver fora do ar quando o backend sobe, ele tenta de novo a cada 60 s até conectar. Ao receber `SIGTERM` (`docker stop`), o consumidor sai do grupo e encerra.
+- **Cuidado com o broker compartilhado** (guia, seção 4.5): se a conexão cair, as novas tentativas esperam cada vez mais (de 0,5 s até 60 s), e não há polling em laço apertado. Se o broker estiver fora do ar quando o backend sobe, ele tenta de novo a cada 60 s até conectar. Ao receber `SIGTERM` (`docker stop`), o consumidor sai do grupo e encerra.
 - **Ordem:** uma mensagem por vez, na ordem em que chegaram.
 
 ## 4. Testar
@@ -111,6 +116,6 @@ Evite deixar um consumidor de teste rodando em segundo plano: o broker é compar
 ## 5. Limitações e próximos passos
 
 - **Sem filtro por empresa** (veja o aviso no topo). É o primeiro ajuste depois da entrega.
-- **Ponte para o broker da Jetson** (seção 1.4): necessária até a Jetson anunciar o endereço real no `advertised.listeners`.
+- **Ponte para o broker da Jetson** (seção 1.4): só para testes no Kafka local da Jetson, enquanto ela anunciar `localhost:9092`. Com o Kafka da nuvem não é usada.
 - **A cancela é simulada** (só escreve no log) até haver protocolo/equipamento real, e o consumidor **não guarda histórico** de leituras.
 - O tópico `ods.i7.plate_read` segue o padrão das outras squads (`ods.<componente>.<evento>`); o guia do Kafka sugere `ods.veiculo.placa_lida` para o I7. Se a TRA-1 decidir mudar, basta trocar `KAFKA_TOPICO`.

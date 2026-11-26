@@ -1,4 +1,5 @@
-# Ponte para o Kafka da Jetson (uso opcional, sempre com -f).
+# Ponte para o Kafka da Jetson (uso opcional, sempre com -f). SÓ PARA TESTES no Kafka local da Jetson:
+# na homologação o A8 usa o Kafka da nuvem (34.66.235.91:9093), que não precisa de ponte.
 #
 # Por que existe: o broker da Jetson anuncia "localhost:9092" (advertised.listeners). Dentro do
 # container do backend, "localhost" é o próprio container, e a conexão falha. Esta ponte (socat)
